@@ -5,19 +5,14 @@
 #include <fstream>
 #include "../json_handler/JHandler.h"
 
-class Helpers : protected JHandler {
+class Helpers {
 public:
-  Helpers(std::string cfg) : JHandler(cfg) {}
-
   Helpers() = default;
+
+protected:
   static int get_current_length(char* str);
-
-  static bool contains(char* &tmp);
-
+  static bool contains(char*& tmp);
   static char* reverse(char*& str);
-
   static std::string readFromFile(std::ifstream& _in);
-
-  void printRequestData();
 };
 #endif //ANONFILE_HELPERS_H

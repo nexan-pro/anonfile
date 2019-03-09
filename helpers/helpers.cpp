@@ -38,15 +38,3 @@ std::string Helpers::readFromFile(std::ifstream& _in) {
     throw std::runtime_error("Error, unable to open file!");
   return tmp;
 }
-
-void Helpers::printRequestData() {
-  if (status) {
-    std::cout << "File was uploaded successfully!\n"
-              << "Full url to file: " << url_ptr->str_full
-              << "\nShort url to file: " << url_ptr->str_short
-              << "\nFile id: " << MD_ptr->id
-              << "\nFilename: " << MD_ptr->name
-              << "\nSize of file: " << MD_ptr->size << '\n';
-  } else
-    std::cerr << "Error: " << error_msg << std::endl;
-}
