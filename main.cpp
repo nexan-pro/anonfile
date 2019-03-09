@@ -11,7 +11,6 @@ int main(int argc, char** argv) {
     std::string id = static_cast<std::string>(argv[2]);
     SendReceiver ctrl;
     ctrl.getInfoReq(id);
-
   }
   else if (argc == 2) {
     strcpy(filename, argv[1]);
@@ -29,8 +28,6 @@ int main(int argc, char** argv) {
               << "File path must be without spaces.\n";
     return -1;
   }
-
-
   std::cout << "Press ENTER to exit.\n";
   std::cin.get();
   return 0;

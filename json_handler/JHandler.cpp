@@ -1,6 +1,7 @@
 #include "JHandler.h"
 
-JHandler::JHandler(std::string &cfg){
+JHandler::JHandler(std::string &cfg) {
+  status = false;
   pjson::document doc;
   try {
     if (doc.deserialize_in_place(const_cast<char*>(cfg.c_str()))) {
