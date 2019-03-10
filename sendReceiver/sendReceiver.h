@@ -1,7 +1,7 @@
 #ifndef ANONFILE_SENDER_H
 #define ANONFILE_SENDER_H
 
-#define LINUX
+//#define LINUX
 //#define DEBUG
 
 #include "../helpers/helpers.h"

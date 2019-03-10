@@ -109,6 +109,11 @@ std::string SendReceiver::sendInfoRequest(std::string& id) {
   CURLcode res;
   if (curl) {
     curl_easy_setopt(curl, CURLOPT_URL, link.c_str());
+
+#ifndef LINUX
+    curl_easy_setopt (curl, CURLOPT_CAINFO, "cacert.pem"); // set path to SSL CA cert issue "cacert.pem"
+#endif
+
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeCallback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &data);
