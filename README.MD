@@ -19,6 +19,7 @@ anonfile.exe -i <file_id>
 ~~~
 # Shell integration
 ![Context Menu](https://i.imgur.com/0AX0xqn.png)
+
 _For this you need to run as administrator_ 
 ~~~
  shell_integration.bat 
