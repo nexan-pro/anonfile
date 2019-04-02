@@ -1,9 +1,8 @@
 #include "sendReceiver.h"
-#include "curl/curl.h"
 
 size_t SendReceiver::writeCallback(char* buf, size_t size, size_t nmemb, void* up) {
   ((std::string*)up)->append(buf, size * nmemb);
-  return size * nmemb;
+return size * nmemb;
 }
 
 bool SendReceiver::uploadFile(char*& pathToFile) {
@@ -69,7 +68,12 @@ bool SendReceiver::uploadFile(char*& pathToFile) {
     curl_easy_setopt(curl, CURLOPT_URL, "https://anonfile.com/api/upload");
 
 #ifndef LINUX
-    curl_easy_setopt (curl, CURLOPT_CAINFO, "cacert.pem"); // set path to SSL CA cert issue "cacert.pem"
+    curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+    curl_easy_setopt(curl, CURLOPT_CAINFO, NULL);
+    curl_easy_setopt(curl, CURLOPT_CAPATH, NULL);
+    curl_easy_setopt(curl, CURLOPT_FRESH_CONNECT, 1L);
+    curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, *sslctx_function); // set void* and load cacert.pem from memory
 #endif
 
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeCallback);
@@ -102,6 +106,65 @@ bool SendReceiver::uploadFile(char*& pathToFile) {
   return status;
 }
 
+CURLcode SendReceiver::sslctx_function(CURL* curl, void* sslctx, void* parm) {
+  CURLcode rv = CURLE_ABORTED_BY_CALLBACK;
+
+  /****************************** cacert.pem *********************************/
+  static const char mypem[] =
+    "-----BEGIN CERTIFICATE-----\n"
+    "MIIDSjCCAjKgAwIBAgIQRK+wgNajJ7qJMDmGLvhAazANBgkqhkiG9w0BAQUFADA/\n"
+    "MSQwIgYDVQQKExtEaWdpdGFsIFNpZ25hdHVyZSBUcnVzdCBDby4xFzAVBgNVBAMT\n"
+    "DkRTVCBSb290IENBIFgzMB4XDTAwMDkzMDIxMTIxOVoXDTIxMDkzMDE0MDExNVow\n"
+    "PzEkMCIGA1UEChMbRGlnaXRhbCBTaWduYXR1cmUgVHJ1c3QgQ28uMRcwFQYDVQQD\n"
+    "Ew5EU1QgUm9vdCBDQSBYMzCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB\n"
+    "AN+v6ZdQCINXtMxiZfaQguzH0yxrMMpb7NnDfcdAwRgUi+DoM3ZJKuM/IUmTrE4O\n"
+    "rz5Iy2Xu/NMhD2XSKtkyj4zl93ewEnu1lcCJo6m67XMuegwGMoOifooUMM0RoOEq\n"
+    "OLl5CjH9UL2AZd+3UWODyOKIYepLYYHsUmu5ouJLGiifSKOeDNoJjj4XLh7dIN9b\n"
+    "xiqKqy69cK3FCxolkHRyxXtqqzTWMIn/5WgTe1QLyNau7Fqckh49ZLOMxt+/yUFw\n"
+    "7BZy1SbsOFU5Q9D8/RhcQPGX69Wam40dutolucbY38EVAjqr2m7xPi71XAicPNaD\n"
+    "aeQQmxkqtilX4+U9m5/wAl0CAwEAAaNCMEAwDwYDVR0TAQH/BAUwAwEB/zAOBgNV\n"
+    "HQ8BAf8EBAMCAQYwHQYDVR0OBBYEFMSnsaR7LHH62+FLkHX/xBVghYkQMA0GCSqG\n"
+    "SIb3DQEBBQUAA4IBAQCjGiybFwBcqR7uKGY3Or+Dxz9LwwmglSBd49lZRNI+DT69\n"
+    "ikugdB/OEIKcdBodfpga3csTS7MgROSR6cz8faXbauX+5v3gTt23ADq1cEmv8uXr\n"
+    "AvHRAosZy5Q6XkjEGB5YGV8eAlrwDPGxrancWYaLbumR9YbK+rlmM6pZW87ipxZz\n"
+    "R8srzJmwN0jP41ZL9c8PDHIyh8bwRLtTcm1D9SZImlJnt1ir/md2cXjbDaJWFBM5\n"
+    "JDGFoqgCWjBH4d1QB7wCCZAA62RjYJsWvIjJEubSfZGL+T0yjWW06XyxV3bqxbYo\n"
+    "Ob8VZRzI9neWagqNdwvYkQsEjgfbKbYK7p2CNTUQ\n"
+    "-----END CERTIFICATE-----\n";
+  /***********************************************************************/
+
+  BIO* cbio = BIO_new_mem_buf(mypem, sizeof(mypem));
+  X509_STORE *cts = SSL_CTX_get_cert_store((SSL_CTX *) sslctx);
+  X509_INFO *itmp;
+  int i, count = 0;
+  STACK_OF(X509_INFO) *inf;
+  (void) curl;
+  (void) parm;
+
+  if (!cts || !cbio) {
+    return rv;
+  }
+
+  inf = PEM_X509_INFO_read_bio(cbio, NULL, NULL, NULL);
+
+  if (!inf) {
+    BIO_free(cbio);
+    return rv;
+  }
+
+  for (i = 0; i < sk_X509_INFO_num(inf); i++) {
+    itmp = sk_X509_INFO_value(inf, i);
+    if (itmp->x509) {
+      X509_STORE_add_cert(cts, itmp->x509);
+      count++;
+    }
+    if (itmp->crl) {
+      X509_STORE_add_crl(cts, itmp->crl);
+      count++;
+    }
+  }
+}
+
 std::string SendReceiver::sendInfoRequest(std::string& id) {
   std::string data;
   std::string link = "https://anonfile.com/api/v2/file/" + static_cast<std::string>(id) + "/info";
@@ -111,7 +174,12 @@ std::string SendReceiver::sendInfoRequest(std::string& id) {
     curl_easy_setopt(curl, CURLOPT_URL, link.c_str());
 
 #ifndef LINUX
-    curl_easy_setopt (curl, CURLOPT_CAINFO, "cacert.pem"); // set path to SSL CA cert issue "cacert.pem"
+    curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+    curl_easy_setopt (curl, CURLOPT_CAINFO, NULL);
+    curl_easy_setopt(curl, CURLOPT_CAPATH, NULL);
+    curl_easy_setopt(curl, CURLOPT_FRESH_CONNECT, 1L);
+    curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, *sslctx_function); // set void* and load cacert.pem from memory
 #endif
 
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
