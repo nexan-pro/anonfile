@@ -17,7 +17,12 @@ _or you can just run the program and enter the path to the file there._
 ~~~
 anonfile.exe -i <file_id>
 ~~~
-
+# Shell integration
+![Context Menu](https://i.imgur.com/0AX0xqn.png)
+_For this you need to run as administrator_ 
+~~~
+ shell_integration.bat 
+~~~~
 # Building from sources
 **Requirements:**
 - [cmake](https://cmake.org/) **minimum version 3.9**
