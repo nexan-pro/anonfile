@@ -20,13 +20,17 @@ anonfile.exe -i <file_id>
 # Shell integration
 ![Context Menu](https://i.imgur.com/0AX0xqn.png)
 
-_For this you need to run as administrator_ 
+_For this you need to run batch script:_ 
 ~~~
  shell_integration.bat 
 ~~~~
 # Building from sources
 **Requirements:**
 - [cmake](https://cmake.org/) **minimum version 3.9**
+- [openssl](https://www.openssl.org)
+- [libcurl](https://curl.haxx.se/libcurl/)
 ~~~
 ./build.sh
 ~~~
+_**Also, if you have build errors, go to the [issues](https://github.com/0x000N3X4N/anonfile/issues)**_
+
