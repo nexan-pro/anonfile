@@ -65,7 +65,7 @@ bool SendReceiver::uploadFile(char*& pathToFile) {
   curl = curl_easy_init();
   headerlist = curl_slist_append(headerlist, "pragma:");
   if (curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://anonfile.com/api/upload");
+    curl_easy_setopt(curl, CURLOPT_URL, "https://api.anonfile.com/upload");
 
 #ifndef LINUX
     curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
