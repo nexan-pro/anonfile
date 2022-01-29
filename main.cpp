@@ -28,6 +28,8 @@ int main(int argc, char** argv) {
               << "File path must be without spaces.\n";
     return -1;
   }
+  delete[] filename;
+
   std::cout << "Press ENTER to exit.\n";
   std::cin.get();
   return 0;

@@ -1,6 +1,6 @@
 #include "JHandler.h"
 
-JHandler::JHandler(std::string &cfg) {
+JHandler::JHandler(const std::string &cfg) {
   status = false;
   pjson::document doc;
   try {
@@ -33,7 +33,7 @@ JHandler::JHandler(std::string &cfg) {
     } else
       throw std::string("Error, bad data. [doc.deserialize_in_place()]");
   }
-  catch(std::string& e) {
+  catch(const std::string& e) {
     std::cerr << e << std::endl;
   }
 }

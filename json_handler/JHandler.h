@@ -27,7 +27,7 @@ protected:
   bool status;
 
 public:
- explicit JHandler(std::string& cfg);
+ explicit JHandler(const std::string& cfg);
  JHandler() = default;
 };
 

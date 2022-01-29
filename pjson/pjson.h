@@ -34,6 +34,8 @@
 
 namespace pjson
 {
+#undef min
+#undef max
    // ---- Types
    typedef unsigned char uint8;
    typedef unsigned int uint;

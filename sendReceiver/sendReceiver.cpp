@@ -1,32 +1,18 @@
 #include "sendReceiver.h"
 
+
+namespace fs = std::filesystem;
+
+
 size_t SendReceiver::writeCallback(char* buf, size_t size, size_t nmemb, void* up) {
   ((std::string*)up)->append(buf, size * nmemb);
-return size * nmemb;
+  return size * nmemb;
 }
 
-bool SendReceiver::uploadFile(char*& pathToFile) {
+bool SendReceiver::uploadFile(char* pathToFile) {
   std::string data, contents;
-  int ecx = Helpers::get_current_length(pathToFile), i = 0;
-  char *formattedFilename = new char[ecx];
+  auto filename = fs::path(pathToFile).filename().string();
 
-  if (Helpers::contains(pathToFile)) {
-    while (pathToFile[ecx] != '\\') {
-      ecx--;
-      if (ecx < 0) break;
-      if (pathToFile[ecx] == '/') break;
-      formattedFilename[i] = pathToFile[ecx];
-      i++;
-    }
-    Helpers::reverse(formattedFilename);
-
-#ifdef DEBUG
-    std::cout << "[DEBUG] : formatted filename is: " << formattedFilename << std::endl;
-#endif
-
-  } else
-    for (int c = 0; c <= ecx; c++)
-      formattedFilename[c] = pathToFile[c];
   std::cout << "pathToFile is: " << pathToFile << std::endl;
 
   std::ifstream in(pathToFile, std::ios::in | std::ios::binary);
@@ -57,7 +43,7 @@ bool SendReceiver::uploadFile(char*& pathToFile) {
 
   curl_formadd(&formpost, &lastptr,
                CURLFORM_COPYNAME, "file",  // the (in this case) wanted file-Tag!
-               CURLFORM_BUFFER, formattedFilename,
+               CURLFORM_BUFFER, filename.c_str(),
                CURLFORM_BUFFERPTR, contents.data(),
                CURLFORM_BUFFERLENGTH, contents.size(),
                CURLFORM_END);
@@ -65,7 +51,7 @@ bool SendReceiver::uploadFile(char*& pathToFile) {
   curl = curl_easy_init();
   headerlist = curl_slist_append(headerlist, "pragma:");
   if (curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://api.anonfile.com/upload");
+    curl_easy_setopt(curl, CURLOPT_URL, Anonfiles::Upload);
 
 #ifndef LINUX
     curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
@@ -84,7 +70,7 @@ bool SendReceiver::uploadFile(char*& pathToFile) {
 
     /* Check for errors */
     if (res != CURLE_OK) {
-      std::cerr << "Error, check you internet connection [" << curl_easy_strerror(res) << "]\n";
+      std::cerr << "Error, check your internet connection [" << curl_easy_strerror(res) << "]\n";
       return false;
     }
 
@@ -97,9 +83,6 @@ bool SendReceiver::uploadFile(char*& pathToFile) {
     curl_slist_free_all(headerlist);
   }
   curl_global_cleanup();
-
-  delete[] pathToFile;
-  delete[] formattedFilename;
 
   SendReceiver handler(data);
   handler.printRequestData();
@@ -165,18 +148,19 @@ CURLcode SendReceiver::sslctx_function(CURL* curl, void* sslctx, void* parm) {
   }
 }
 
-std::string SendReceiver::sendInfoRequest(std::string& id) {
+std::string SendReceiver::sendInfoRequest(const std::string& id) {
   std::string data;
-  std::string link = "https://anonfile.com/api/v2/file/" + static_cast<std::string>(id) + "/info";
+  std::string link = Anonfiles::Fileinfo + id + "/info";
   CURL* curl = curl_easy_init();
   CURLcode res;
+
   if (curl) {
     curl_easy_setopt(curl, CURLOPT_URL, link.c_str());
 
 #ifndef LINUX
     curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
-    curl_easy_setopt (curl, CURLOPT_CAINFO, NULL);
+    curl_easy_setopt(curl, CURLOPT_CAINFO, NULL);
     curl_easy_setopt(curl, CURLOPT_CAPATH, NULL);
     curl_easy_setopt(curl, CURLOPT_FRESH_CONNECT, 1L);
     curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, *sslctx_function); // set void* and load cacert.pem from memory
@@ -190,11 +174,13 @@ std::string SendReceiver::sendInfoRequest(std::string& id) {
     if (res != CURLE_OK)
       std::cout << "Error, check your internet connection!\n";
   }
+
   curl_easy_cleanup(curl);
+
   return data;
 }
 
-bool SendReceiver::getInfoReq(std::string& id) {
+bool SendReceiver::getInfoReq(const std::string& id) {
   try {
     (id.empty() || id.size() == 0) ? throw std::string("Error, NULLPTR exception!") : 0;
     std::string request_data = sendInfoRequest(id);
@@ -203,7 +189,7 @@ bool SendReceiver::getInfoReq(std::string& id) {
 #endif
     SendReceiver handler(request_data);
     handler.printRequestData();
-  } catch (const std::string str) {
+  } catch (const std::string& str) {
     std::cout << str << std::endl;
   }
   return true;

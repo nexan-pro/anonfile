@@ -10,9 +10,6 @@ public:
   Helpers() = default;
 
 protected:
-  static int get_current_length(char* str);
-  static bool contains(char*& tmp);
-  static char* reverse(char*& str);
   static std::string readFromFile(std::ifstream& _in);
 };
 #endif //ANONFILE_HELPERS_H
