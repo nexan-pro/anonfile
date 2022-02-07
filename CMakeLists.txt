@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.9)
 project(anonfile)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CURL_LIBRARY "-lcurl")
 find_package(CURL REQUIRED)
 find_package(OpenSSL REQUIRED)
