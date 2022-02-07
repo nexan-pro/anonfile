@@ -1,6 +1,6 @@
 
 # Anonfile
-[![Build Status](https://travis-ci.org/0x000N3X4N/anonfile.svg?branch=master)](https://travis-ci.org/0x000N3X4N/anonfile) [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/0x000N3X4N/anonfile/issues)  [![Version](https://img.shields.io/badge/version-0.02-orange.svg?style=flat-square&logo=appveyor)](https://github.com/0x000N3X4N/anonfile/releases)
+[![Build Status](https://travis-ci.org/0x000N3X4N/anonfile.svg?branch=master)](https://travis-ci.org/0x000N3X4N/anonfile) [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/0x000N3X4N/anonfile/issues)  [![Version](https://img.shields.io/badge/version-1.0.0-orange.svg?style=flat-square&logo=appveyor)](https://github.com/0x000N3X4N/anonfile/releases)
 
 # Usage
 [![Demo CountPages alpha](https://i.imgur.com/ovGt5Xw.gif)](https://i.imgur.com/ovGt5Xw.gif)
